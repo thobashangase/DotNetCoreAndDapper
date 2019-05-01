@@ -36,7 +36,10 @@ namespace WebApplication1Dapper.Controllers
                 {
                     return RedirectToAction("Index");
                 }
-                return View(model);
+                else
+                {
+                    ModelState.AddModelError("", "Problem adding a person");
+                }
             }
             //if all else fails and we get here, redisplay form
             return View(model);

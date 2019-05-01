@@ -6,12 +6,21 @@ using WebApplication1Dapper.Models;
 using Dapper;
 using System.Data;
 using System.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 
 namespace WebApplication1Dapper.Logic
 {
     public class PeopleLogic : IPeopleLogic
     {
-        private readonly string ConnStr = "Server=DESKTOP-OV54ARB;Database=TestDbFirst;Trusted_Connection=True;MultipleActiveResultSets=true";
+        private readonly IConfiguration _configuration;
+
+        private readonly string ConnStr;
+
+        public PeopleLogic(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            ConnStr = _configuration.GetConnectionString("DefaultConnectionString");
+        }
 
         /// <summary>
         /// Gets people record list from the People table in the database.

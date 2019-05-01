@@ -10,7 +10,12 @@ namespace WebApplication1Dapper.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly PeopleLogic _logic = new PeopleLogic();
+        private readonly PeopleLogic _logic;
+
+        public AccountController(PeopleLogic logic)
+        {
+            _logic = logic;
+        }
 
         public IActionResult Login()
         {
@@ -22,23 +27,14 @@ namespace WebApplication1Dapper.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = _logic.GetPersonByUsername(model.Username);
-
-                if (result == null)
+                var validuser = _logic.ValidateUser(model);
+                if (validuser == null)
                 {
-                    ModelState.AddModelError("", "No such user");
+                    ModelState.AddModelError("", "Invalid username/password");
                 }
                 else
                 {
-                    var validuser = _logic.ValidateUser(model);
-                    if (validuser == null)
-                    {
-                        ModelState.AddModelError("", "Invalid username/password");
-                    }
-                    else
-                    {
-                        //login
-                    }
+                    //login
                 }
             }
             return View(model);
