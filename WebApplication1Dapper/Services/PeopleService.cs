@@ -10,13 +10,13 @@ using Microsoft.Extensions.Configuration;
 
 namespace WebApplication1Dapper.Logic
 {
-    public class PeopleLogic : IPeopleLogic
+    public class PeopleService : IPeopleService
     {
         private readonly IConfiguration _configuration;
 
         private readonly string ConnStr;
 
-        public PeopleLogic(IConfiguration configuration)
+        public PeopleService(IConfiguration configuration)
         {
             _configuration = configuration;
             ConnStr = _configuration.GetConnectionString("DefaultConnectionString");

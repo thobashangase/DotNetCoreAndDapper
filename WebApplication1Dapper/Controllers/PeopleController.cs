@@ -10,9 +10,9 @@ namespace WebApplication1Dapper.Controllers
 {
     public class PeopleController : Controller
     {
-        private readonly IPeopleLogic _logic;
+        private readonly IPeopleService _logic;
 
-        public PeopleController(IPeopleLogic logic)
+        public PeopleController(IPeopleService logic)
         {
             _logic = logic;
         }

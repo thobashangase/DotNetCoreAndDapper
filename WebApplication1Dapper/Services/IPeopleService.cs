@@ -4,7 +4,7 @@ using WebApplication1Dapper.Models;
 
 namespace WebApplication1Dapper.Logic
 {
-    public interface IPeopleLogic
+    public interface IPeopleService
     {
         int AddPerson(Person person);
         List<Person> GetPeople();

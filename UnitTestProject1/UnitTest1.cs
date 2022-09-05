@@ -48,7 +48,7 @@ namespace UnitTestProject1
             }
         };
 
-        Mock<IPeopleLogic> mock = new Mock<IPeopleLogic>();
+        Mock<IPeopleService> mock = new Mock<IPeopleService>();
 
         public UnitTest1()
         {
