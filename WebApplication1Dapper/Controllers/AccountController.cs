@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebApplication1Dapper.Logic;
 using WebApplication1Dapper.Models;
 
@@ -10,11 +6,11 @@ namespace WebApplication1Dapper.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly PeopleService _logic;
+        private readonly PeopleService _peopleService;
 
-        public AccountController(PeopleService logic)
+        public AccountController(PeopleService peopleService)
         {
-            _logic = logic;
+            _peopleService = peopleService;
         }
 
         public IActionResult Login()
@@ -27,7 +23,8 @@ namespace WebApplication1Dapper.Controllers
         {
             if (ModelState.IsValid)
             {
-                var validuser = _logic.ValidateUser(model);
+                var validuser = _peopleService.ValidateUserAsync(model);
+
                 if (validuser == null)
                 {
                     ModelState.AddModelError("", "Invalid username/password");

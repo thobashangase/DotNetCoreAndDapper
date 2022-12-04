@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1Dapper.Logic;
 using WebApplication1Dapper.Models;
@@ -10,16 +7,16 @@ namespace WebApplication1Dapper.Controllers
 {
     public class PeopleController : Controller
     {
-        private readonly IPeopleService _logic;
+        private readonly IPeopleService _peopleService;
 
-        public PeopleController(IPeopleService logic)
+        public PeopleController(IPeopleService peopleService)
         {
-            _logic = logic;
+            _peopleService = peopleService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View(_logic.GetPeople());
+            return View(await _peopleService.GetPeopleAsync());
         }
 
         public IActionResult Create()
@@ -28,11 +25,11 @@ namespace WebApplication1Dapper.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromForm] Person model)
+        public async Task<IActionResult> Create([FromForm] Person model)
         {
             if (ModelState.IsValid)
             {
-                if (_logic.AddPerson(model) > 0)
+                if (await _peopleService.AddPersonAsync(model) > 0)
                 {
                     return RedirectToAction("Index");
                 }

@@ -22,17 +22,18 @@ namespace WebApplication1Dapper.Logic
             ConnStr = _configuration.GetConnectionString("DefaultConnectionString");
         }
 
+        private IDbConnection Connection() => new SqlConnection(ConnStr);
+
         /// <summary>
         /// Gets people record list from the People table in the database.
         /// </summary>
         /// <returns>A list of type Person</returns>
-        public List<Person> GetPeople()
+        public async Task<List<Person>> GetPeopleAsync()
         {
-            using (IDbConnection dbConn = new SqlConnection(ConnStr))
-            {
-                string sqlQuery = "SELECT * FROM People";
-                return dbConn.Query<Person>(sqlQuery).ToList();
-            }
+            using var dbConn = Connection();
+            string sqlQuery = "SELECT * FROM People";
+            var people = await dbConn.QueryAsync<Person>(sqlQuery);
+            return people.ToList();
         }
 
         /// <summary>
@@ -40,14 +41,12 @@ namespace WebApplication1Dapper.Logic
         /// </summary>
         /// <param name="id">A GUID value (uniqueidentifier in SQL) used to find a matching primary key of an existing person record.</param>
         /// <returns>Details of the person or null if no matching person record was found.</returns>
-        public Person GetPersonById(Guid id)
+        public async Task<Person> GetPersonByIdAsync(Guid id)
         {
-            using (IDbConnection dbConn = new SqlConnection(ConnStr))
-            {
-                string sqlQuery = "SELECT * FROM People WHERE TenantGUID = @TenantGUID";
-
-                return dbConn.QueryFirstOrDefault<Person>(sqlQuery, new { TenantGUID = id });
-            }
+            using var dbConn = Connection();
+            string sqlQuery = "SELECT * FROM People WHERE TenantGUID = @TenantGUID";
+            var person = await dbConn.QueryFirstOrDefaultAsync<Person>(sqlQuery, new { TenantGUID = id });
+            return person;
         }
 
         /// <summary>
@@ -55,14 +54,12 @@ namespace WebApplication1Dapper.Logic
         /// </summary>
         /// <param name="username">A username used to find a matching username of an existing person record.</param>
         /// <returns>Details of the person or null if no matching person record was found.</returns>
-        public Person GetPersonByUsername(string username)
+        public async Task<Person> GetPersonByUsernameAsync(string username)
         {
-            using (IDbConnection dbConn = new SqlConnection(ConnStr))
-            {
-                string sqlQuery = "SELECT * FROM People WHERE TenantGUID = @Username";
-
-                return dbConn.QueryFirstOrDefault<Person>(sqlQuery, new { Username = username});
-            }
+            using var dbConn = Connection();
+            string sqlQuery = "SELECT * FROM People WHERE TenantGUID = @Username";
+            var person = await dbConn.QueryFirstOrDefaultAsync<Person>(sqlQuery, new { Username = username });
+            return person;
         }
 
         /// <summary>
@@ -70,14 +67,12 @@ namespace WebApplication1Dapper.Logic
         /// </summary>
         /// <param name="model">A model containing username and password.</param>
         /// <returns>Details of the person or null if no matching person record was found.</returns>
-        public Person ValidateUser(LoginViewModel model)
+        public async Task<Person> ValidateUserAsync(LoginViewModel model)
         {
-            using (IDbConnection dbConn = new SqlConnection(ConnStr))
-            {
-                string sqlQuery = "SELECT * FROM People WHERE TenantGUID = @Username AND Password = @Password";
-
-                return dbConn.QueryFirstOrDefault<Person>(sqlQuery, new { model.Username, model.Password });
-            }
+            using var dbConn = Connection();
+            string sqlQuery = "SELECT * FROM People WHERE TenantGUID = @Username AND Password = @Password";
+            var user = await dbConn.QueryFirstOrDefaultAsync<Person>(sqlQuery, new { model.Username, model.Password });
+            return user;
         }
 
         /// <summary>
@@ -85,15 +80,13 @@ namespace WebApplication1Dapper.Logic
         /// </summary>
         /// <param name="person">A model containing person properties.</param>
         /// <returns>The number of rows affected in SQL as a result of this execution.</returns>
-        public int AddPerson(Person person)
+        public async Task<int> AddPersonAsync(Person person)
         {
-            using (IDbConnection dbConn = new SqlConnection(ConnStr))
-            {
-                person.TenantGUID = Guid.NewGuid();
-                string sqlQuery = "AddPerson";
-                int affectedRows = dbConn.Execute(sqlQuery, person, commandType: CommandType.StoredProcedure);
-                return affectedRows;
-            }
+            using var dbConn = Connection();
+            person.TenantGUID = Guid.NewGuid();
+            string sqlQuery = "AddPerson";
+            int affectedRows = await dbConn.ExecuteAsync(sqlQuery, person, commandType: CommandType.StoredProcedure);
+            return affectedRows;
         }
     }
 }

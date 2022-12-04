@@ -46,3 +46,8 @@ C:\Development\DotNetCoreAndDapper\WebApplication1Dapper\obj\Debug\netcoreapp3.1
 C:\Development\DotNetCoreAndDapper\WebApplication1Dapper\obj\Debug\netcoreapp3.1\WebApplication1Dapper.genruntimeconfig.cache
 C:\Development\DotNetCoreAndDapper\WebApplication1Dapper\bin\Debug\netcoreapp3.1\runtimes\unix\lib\netcoreapp2.1\System.Data.SqlClient.dll
 C:\Development\DotNetCoreAndDapper\WebApplication1Dapper\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.1\System.Data.SqlClient.dll
+C:\Development\DotNetCoreAndDapper\WebApplication1Dapper\obj\Debug\netcoreapp3.1\staticwebassets\WebApplication1Dapper.StaticWebAssets.Pack.cache
+C:\Development\DotNetCoreAndDapper\WebApplication1Dapper\obj\Debug\netcoreapp3.1\staticwebassets\msbuild.WebApplication1Dapper.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Development\DotNetCoreAndDapper\WebApplication1Dapper\obj\Debug\netcoreapp3.1\staticwebassets\msbuild.build.WebApplication1Dapper.props
+C:\Development\DotNetCoreAndDapper\WebApplication1Dapper\obj\Debug\netcoreapp3.1\staticwebassets\msbuild.buildMultiTargeting.WebApplication1Dapper.props
+C:\Development\DotNetCoreAndDapper\WebApplication1Dapper\obj\Debug\netcoreapp3.1\staticwebassets\msbuild.buildTransitive.WebApplication1Dapper.props

@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using WebApplication1Dapper.Controllers;
 using WebApplication1Dapper.Logic;
 using WebApplication1Dapper.Models;
@@ -52,8 +53,8 @@ namespace UnitTestProject1
 
         public UnitTest1()
         {
-            mock.Setup(p => p.GetPeople()).Returns(people);
-            mock.Setup(p => p.AddPerson(person)).Returns(1);
+            mock.Setup(p => p.GetPeopleAsync()).Returns(Task.Run(() => people));
+            mock.Setup(p => p.AddPersonAsync(person)).Returns(Task.Run(() => 1));
         }
         
         [TestMethod]
@@ -61,7 +62,7 @@ namespace UnitTestProject1
         {
             PeopleController peopleCtrl = new PeopleController(mock.Object);
             var result = peopleCtrl.Create(person);
-            Assert.AreEqual(typeof(RedirectToActionResult), result.GetType());
+            Assert.AreEqual(typeof(Task<RedirectToActionResult>), result.GetType());
         }
 
         [TestMethod]
@@ -69,7 +70,7 @@ namespace UnitTestProject1
         {
             PeopleController peopleCtrl = new PeopleController(mock.Object);
             var result = peopleCtrl.Create(invalidPerson);
-            Assert.AreEqual(typeof(ViewResult), result.GetType());
+            Assert.AreEqual(typeof(Task<IActionResult>), result.GetType());
         }
 
         [TestMethod]
@@ -77,15 +78,15 @@ namespace UnitTestProject1
         {
             PeopleController peopleCtrl = new PeopleController(mock.Object);
             var result = peopleCtrl.Index();
-            Assert.AreEqual(typeof(ViewResult), result.GetType());
+            Assert.AreEqual(typeof(Task<IActionResult>), result.GetType());
         }
 
         [TestMethod]
-        public void Index_WhenCalled_Returns_People()
+        public async Task Index_WhenCalled_Returns_People()
         {
             PeopleController peopleCtrl = new PeopleController(mock.Object);
-            var result = (ViewResult) peopleCtrl.Index();
-            Assert.AreEqual(people, result.Model);
+            var result = (Task<IActionResult>) await peopleCtrl.Index();
+            Assert.AreEqual(typeof(Task<ViewResult>), result.GetType());
         }
     }
 }
