@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using WebApplication1Dapper.Logic;
+using WebApplication1Dapper.Services;
 
 namespace WebApplication1Dapper
 {

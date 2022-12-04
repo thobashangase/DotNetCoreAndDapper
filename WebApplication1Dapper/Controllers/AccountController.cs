@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebApplication1Dapper.Logic;
+using WebApplication1Dapper.Services;
 using WebApplication1Dapper.Models;
 
 namespace WebApplication1Dapper.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly PeopleService _peopleService;
+        private readonly IPeopleService _peopleService;
 
-        public AccountController(PeopleService peopleService)
+        public AccountController(IPeopleService peopleService)
         {
             _peopleService = peopleService;
         }

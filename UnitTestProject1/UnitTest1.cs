@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebApplication1Dapper.Controllers;
-using WebApplication1Dapper.Logic;
+using WebApplication1Dapper.Services;
 using WebApplication1Dapper.Models;
 
 namespace UnitTestProject1
@@ -49,18 +49,18 @@ namespace UnitTestProject1
             }
         };
 
-        Mock<IPeopleService> mock = new Mock<IPeopleService>();
+        Mock<IPeopleService> mockPeopleService = new Mock<IPeopleService>();
 
         public UnitTest1()
         {
-            mock.Setup(p => p.GetPeopleAsync()).Returns(Task.Run(() => people));
-            mock.Setup(p => p.AddPersonAsync(person)).Returns(Task.Run(() => 1));
+            mockPeopleService.Setup(p => p.GetPeopleAsync()).Returns(Task.Run(() => people));
+            mockPeopleService.Setup(p => p.AddPersonAsync(person)).Returns(Task.Run(() => 1));
         }
         
         [TestMethod]
         public void Create_WhenCalled_Returns_RedirectToActionResult()
         {
-            PeopleController peopleCtrl = new PeopleController(mock.Object);
+            PeopleController peopleCtrl = new PeopleController(mockPeopleService.Object);
             var result = peopleCtrl.Create(person);
             Assert.AreEqual(typeof(Task<RedirectToActionResult>), result.GetType());
         }
@@ -68,7 +68,7 @@ namespace UnitTestProject1
         [TestMethod]
         public void Create_WhenInvalidPersonPassed_Returns_ViewResult()
         {
-            PeopleController peopleCtrl = new PeopleController(mock.Object);
+            PeopleController peopleCtrl = new PeopleController(mockPeopleService.Object);
             var result = peopleCtrl.Create(invalidPerson);
             Assert.AreEqual(typeof(Task<IActionResult>), result.GetType());
         }
@@ -76,7 +76,7 @@ namespace UnitTestProject1
         [TestMethod]
         public void Index_WhenCalled_Returns_ViewResult()
         {
-            PeopleController peopleCtrl = new PeopleController(mock.Object);
+            PeopleController peopleCtrl = new PeopleController(mockPeopleService.Object);
             var result = peopleCtrl.Index();
             Assert.AreEqual(typeof(Task<IActionResult>), result.GetType());
         }
@@ -84,7 +84,7 @@ namespace UnitTestProject1
         [TestMethod]
         public async Task Index_WhenCalled_Returns_People()
         {
-            PeopleController peopleCtrl = new PeopleController(mock.Object);
+            PeopleController peopleCtrl = new PeopleController(mockPeopleService.Object);
             var result = (Task<IActionResult>) await peopleCtrl.Index();
             Assert.AreEqual(typeof(Task<ViewResult>), result.GetType());
         }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebApplication1Dapper.Models;
 
-namespace WebApplication1Dapper.Logic
+namespace WebApplication1Dapper.Services
 {
     public interface IPeopleService
     {

@@ -1,7 +1,10 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1Dapper.Logic;
+using WebApplication1Dapper.Services;
 using WebApplication1Dapper.Models;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
+using System;
 
 namespace WebApplication1Dapper.Controllers
 {
@@ -14,9 +17,17 @@ namespace WebApplication1Dapper.Controllers
             _peopleService = peopleService;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            return View(await _peopleService.GetPeopleAsync());
+            try
+            {
+                return View(await _peopleService.GetPeopleAsync());
+            }
+            catch(Exception ex)
+            {
+                throw;
+            }
         }
 
         public IActionResult Create()
