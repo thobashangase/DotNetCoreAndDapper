@@ -24,7 +24,20 @@ namespace WebApplication1Dapper.Controllers
             {
                 return View(await _peopleService.GetPeopleAsync());
             }
-            catch(Exception ex)
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Details(Guid id)
+        {
+            try
+            {
+                return View(await _peopleService.GetPersonByIdAsync(id));
+            }
+            catch (Exception ex)
             {
                 throw;
             }
