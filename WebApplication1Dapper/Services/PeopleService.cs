@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WebApplication1Dapper.Models;
+﻿using WebApplication1Dapper.Models;
 using Dapper;
 using System.Data;
-using System.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Data.Sqlite;
+using System;
+using Serilog;
 
 namespace WebApplication1Dapper.Services
 {
@@ -17,20 +14,55 @@ namespace WebApplication1Dapper.Services
         public PeopleService(IConfiguration configuration)
         {
             _configuration = configuration;
+
+            Task.Run(async () => 
+            {
+                await CreateDatabaseIfNotExists();
+                await CreateTableIfNotExists();
+            });
         }
 
-        private IDbConnection Connection() => new SqlConnection(_configuration.GetConnectionString("DefaultConnectionString"));
+        private IDbConnection Connection()
+        {
+            var connection = new SqliteConnection(_configuration.GetConnectionString("DefaultConnectionString"));
+            connection.Open();
 
+            Log.Information("Connected successfully to the database.");
+
+            return connection;
+        }
+
+        private async Task CreateDatabaseIfNotExists()
+        {
+            using var connection = Connection();
+            var query = $"CREATE DATABASE IF NOT EXISTS PeopleDb";
+
+            await connection.ExecuteAsync(query);
+        }
+
+        private async Task CreateTableIfNotExists()
+        {
+            using var connection = Connection();
+            var query = $"CREATE TABLE IF NOT EXISTS People (" +
+                        $"Id INTEGER PRIMARY KEY NOT NULL UNIQUE," +
+                        $"FirstName TEXT (30) NOT NULL," +
+                        $"LastName  TEXT (30) NOT NULL," +
+                        $"Phone     TEXT (13) NOT NULL," +
+                        $"Email     TEXT (50)" +
+                        $");";
+
+            await connection.ExecuteAsync(query);
+        }
+        
         /// <summary>
         /// Gets people record list from the People table in the database.
         /// </summary>
         /// <returns>A list of type Person</returns>
         public async Task<List<Person>> GetPeopleAsync()
         {
-            using var dbConn = Connection();
-            dbConn.Open();
-            string sqlQuery = "SELECT * FROM People";
-            var people = await dbConn.QueryAsync<Person>(sqlQuery);
+            using var connection = Connection();
+            string query = "SELECT * FROM People";
+            var people = await connection.QueryAsync<Person>(query);
             return people.ToList();
         }
 
@@ -39,56 +71,55 @@ namespace WebApplication1Dapper.Services
         /// </summary>
         /// <param name="id">A GUID value (uniqueidentifier in SQL) used to find a matching primary key of an existing person record.</param>
         /// <returns>Details of the person or null if no matching person record was found.</returns>
-        public async Task<Person> GetPersonByIdAsync(Guid id)
+        public async Task<Person> GetPersonByIdAsync(int id)
         {
-            using var dbConn = Connection();
-            dbConn.Open();
-            string sqlQuery = "SELECT * FROM People WHERE TenantGUID = @TenantGUID";
-            var person = await dbConn.QueryFirstOrDefaultAsync<Person>(sqlQuery, new { TenantGUID = id });
+            using var connection = Connection();
+            string query = "SELECT * FROM People WHERE Id = @Id";
+            var person = await connection.QueryFirstOrDefaultAsync<Person>(query, new { Id = id });
             return person;
         }
 
         /// <summary>
-        /// Finds a person by their GUID and returns his/her details.
-        /// </summary>
-        /// <param name="username">A username used to find a matching username of an existing person record.</param>
-        /// <returns>Details of the person or null if no matching person record was found.</returns>
-        public async Task<Person> GetPersonByUsernameAsync(string username)
-        {
-            using var dbConn = Connection();
-            dbConn.Open();
-            string sqlQuery = "SELECT * FROM People WHERE TenantGUID = @Username";
-            var person = await dbConn.QueryFirstOrDefaultAsync<Person>(sqlQuery, new { Username = username });
-            return person;
-        }
-
-        /// <summary>
-        /// Checks the person table for a user whose username and password matches those contained in the model.
-        /// </summary>
-        /// <param name="model">A model containing username and password.</param>
-        /// <returns>Details of the person or null if no matching person record was found.</returns>
-        public async Task<Person> ValidateUserAsync(LoginViewModel model)
-        {
-            using var dbConn = Connection();
-            dbConn.Open();
-            string sqlQuery = "SELECT * FROM People WHERE TenantGUID = @Username AND Password = @Password";
-            var user = await dbConn.QueryFirstOrDefaultAsync<Person>(sqlQuery, new { model.Username, model.Password });
-            return user;
-        }
-
-        /// <summary>
-        /// Inserts a record to the person table in the database using model properties as values.
+        /// Inserts a record to the People table in the database using model properties as values.
         /// </summary>
         /// <param name="person">A model containing person properties.</param>
         /// <returns>The number of rows affected in SQL as a result of this execution.</returns>
         public async Task<int> AddPersonAsync(Person person)
         {
-            using var dbConn = Connection();
-            dbConn.Open();
-            person.TenantGUID = Guid.NewGuid();
-            string sqlQuery = "AddPerson";
-            int affectedRows = await dbConn.ExecuteAsync(sqlQuery, person, commandType: CommandType.StoredProcedure);
-            return affectedRows;
+            using var connection = Connection();
+            var query = $"INSERT INTO People " +
+                        $"(FirstName, LastName, Email, Phone) VALUES " +
+                        $"(@FirstName, @LastName, @Email, @Phone)";
+
+            return await connection.ExecuteAsync(query, person);
+        }
+
+        /// <summary>
+        /// Updates a person record on People table in the database using model properties as values.
+        /// </summary>
+        /// <param name="person">A model containing person properties.</param>
+        /// <returns>The number of rows affected in SQL as a result of this execution.</returns>
+        public async Task<int> UpdatePersonAsync(Person person)
+        {
+            using var connection = Connection();
+            var query = $"UPDATE People " +
+                        $"SET FirstName = @FirstName, LastName = @LastName, Email = @Email, Phone = @Phone " +
+                        $"WHERE Id = @Id";
+
+            return await connection.ExecuteAsync(query, person);
+        }
+
+        /// <summary>
+        /// Deletes a person record on People table in the database using model properties as values.
+        /// </summary>
+        /// <param name="person">A model containing person properties.</param>
+        /// <returns>The number of rows affected in SQL as a result of this execution.</returns>
+        public async Task<int> DeletePersonAsync(Person person)
+        {
+            using var connection = Connection();
+            var query = $"DELETE FROM People WHERE Id = @Id";
+
+            return await connection.ExecuteAsync(query, new { person.Id });
         }
     }
 }

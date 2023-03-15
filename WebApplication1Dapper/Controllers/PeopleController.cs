@@ -1,10 +1,6 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebApplication1Dapper.Services;
 using WebApplication1Dapper.Models;
-using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
-using System;
 
 namespace WebApplication1Dapper.Controllers
 {
@@ -17,30 +13,14 @@ namespace WebApplication1Dapper.Controllers
             _peopleService = peopleService;
         }
 
-        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                return View(await _peopleService.GetPeopleAsync());
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            return View(await _peopleService.GetPeopleAsync());
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Details(Guid id)
+        public async Task<IActionResult> Details(int id)
         {
-            try
-            {
-                return View(await _peopleService.GetPersonByIdAsync(id));
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            return View(await _peopleService.GetPersonByIdAsync(id));
         }
 
         public IActionResult Create()
@@ -59,11 +39,51 @@ namespace WebApplication1Dapper.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", "Problem adding a person");
+                    ModelState.AddModelError("", "Problem adding person details");
                 }
             }
+
             //if all else fails and we get here, redisplay form
             return View(model);
+        }
+
+        public IActionResult Edit(int id)
+        {
+            return View(_peopleService.GetPersonByIdAsync(id).Result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit([FromForm] Person model)
+        {
+            if (ModelState.IsValid)
+            {
+                if (await _peopleService.UpdatePersonAsync(model) > 0)
+                {
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Problem updating person details");
+                }
+            }
+
+            //if all else fails and we get here, redisplay form
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var person = await _peopleService.GetPersonByIdAsync(id);
+
+            if (person != null)
+            {
+                await _peopleService.DeletePersonAsync(person);
+                return RedirectToAction("Index");
+            }
+            
+            //if all else fails and we get here, redisplay form
+            return View(person);
         }
     }
 }

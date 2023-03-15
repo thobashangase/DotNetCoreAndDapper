@@ -1,4 +1,5 @@
 ﻿using WebApplication1Dapper.Services;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,10 @@ builder.Services.AddScoped<IPeopleService, PeopleService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Host.UseSerilog((hostContext, services, configuration) => {
+    configuration.WriteTo.Console();
+});
 
 var app = builder.Build();
 
