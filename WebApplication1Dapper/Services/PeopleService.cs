@@ -13,30 +13,14 @@ namespace WebApplication1Dapper.Services
         public PeopleService(IConfiguration configuration)
         {
             _configuration = configuration;
-            CreateTableIfNotExists();            
         }
 
-        private IDbConnection Connection()
+        private async Task<IDbConnection> Connection()
         {
             var connection = new SqliteConnection(_configuration.GetConnectionString("DefaultConnectionString"));
-            connection.Open();
-
-            Log.Information("Connected successfully to the database.");
-
+            await connection.OpenAsync();
+            Log.Information("Successfully connected to the database");
             return connection;
-        }
-
-        private void CreateTableIfNotExists()
-        {
-            using var connection = Connection();
-            var query = $"CREATE TABLE IF NOT EXISTS People (" +
-                        $"Id INTEGER PRIMARY KEY NOT NULL UNIQUE," +
-                        $"FirstName TEXT (30) NOT NULL," +
-                        $"LastName  TEXT (30) NOT NULL," +
-                        $"Phone     TEXT (13) NOT NULL," +
-                        $"Email     TEXT (50));";
-
-            connection.Execute(query);
         }
 
         /// <summary>
@@ -45,7 +29,7 @@ namespace WebApplication1Dapper.Services
         /// <returns>A list of type Person</returns>
         public async Task<List<Person>> GetPeopleAsync()
         {
-            using var connection = Connection();
+            using var connection = await Connection();
             string query = "SELECT * FROM People";
             var people = await connection.QueryAsync<Person>(query);
             return people.ToList();
@@ -58,7 +42,7 @@ namespace WebApplication1Dapper.Services
         /// <returns>Details of the person or null if no matching person record was found.</returns>
         public async Task<Person> GetPersonByIdAsync(int id)
         {
-            using var connection = Connection();
+            using var connection = await Connection();
             string query = "SELECT * FROM People WHERE Id = @Id";
             var person = await connection.QueryFirstOrDefaultAsync<Person>(query, new { Id = id });
             return person;
@@ -71,10 +55,8 @@ namespace WebApplication1Dapper.Services
         /// <returns>The number of rows affected in SQL as a result of this execution.</returns>
         public async Task<int> AddPersonAsync(Person person)
         {
-            using var connection = Connection();
-            var query = $"INSERT INTO People " +
-                        $"(FirstName, LastName, Email, Phone) VALUES " +
-                        $"(@FirstName, @LastName, @Email, @Phone)";
+            using var connection = await Connection();
+            var query = $"INSERT INTO People (Name) VALUES (@Name)";
 
             return await connection.ExecuteAsync(query, person);
         }
@@ -86,10 +68,8 @@ namespace WebApplication1Dapper.Services
         /// <returns>The number of rows affected in SQL as a result of this execution.</returns>
         public async Task<int> UpdatePersonAsync(Person person)
         {
-            using var connection = Connection();
-            var query = $"UPDATE People " +
-                        $"SET FirstName = @FirstName, LastName = @LastName, Email = @Email, Phone = @Phone " +
-                        $"WHERE Id = @Id";
+            using var connection = await Connection();
+            var query = $"UPDATE People SET Name = @Name WHERE Id = @Id";
 
             return await connection.ExecuteAsync(query, person);
         }
@@ -101,7 +81,7 @@ namespace WebApplication1Dapper.Services
         /// <returns>The number of rows affected in SQL as a result of this execution.</returns>
         public async Task<int> DeletePersonAsync(Person person)
         {
-            using var connection = Connection();
+            using var connection = await Connection();
             var query = $"DELETE FROM People WHERE Id = @Id";
 
             return await connection.ExecuteAsync(query, new { person.Id });

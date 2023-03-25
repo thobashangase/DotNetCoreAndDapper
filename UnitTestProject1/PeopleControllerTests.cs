@@ -34,7 +34,7 @@ namespace UnitTestProject1
             person = fixture.Create<Person>();
             
             invalidPerson = fixture.Create<Person>();
-            invalidPerson.FirstName = "";
+            invalidPerson.Name = "";
 
             mockPeopleService = new Mock<IPeopleService>();
             mockPeopleService.Setup(p => p.GetPeopleAsync()).Returns(Task.Run(() => people));
