@@ -2,7 +2,6 @@
 using Dapper;
 using System.Data;
 using Microsoft.Data.Sqlite;
-using System;
 using Serilog;
 
 namespace WebApplication1Dapper.Services
@@ -14,12 +13,7 @@ namespace WebApplication1Dapper.Services
         public PeopleService(IConfiguration configuration)
         {
             _configuration = configuration;
-
-            Task.Run(async () => 
-            {
-                await CreateDatabaseIfNotExists();
-                await CreateTableIfNotExists();
-            });
+            CreateTableIfNotExists();            
         }
 
         private IDbConnection Connection()
@@ -32,15 +26,7 @@ namespace WebApplication1Dapper.Services
             return connection;
         }
 
-        private async Task CreateDatabaseIfNotExists()
-        {
-            using var connection = Connection();
-            var query = $"CREATE DATABASE IF NOT EXISTS PeopleDb";
-
-            await connection.ExecuteAsync(query);
-        }
-
-        private async Task CreateTableIfNotExists()
+        private void CreateTableIfNotExists()
         {
             using var connection = Connection();
             var query = $"CREATE TABLE IF NOT EXISTS People (" +
@@ -48,12 +34,11 @@ namespace WebApplication1Dapper.Services
                         $"FirstName TEXT (30) NOT NULL," +
                         $"LastName  TEXT (30) NOT NULL," +
                         $"Phone     TEXT (13) NOT NULL," +
-                        $"Email     TEXT (50)" +
-                        $");";
+                        $"Email     TEXT (50));";
 
-            await connection.ExecuteAsync(query);
+            connection.Execute(query);
         }
-        
+
         /// <summary>
         /// Gets people record list from the People table in the database.
         /// </summary>
@@ -67,9 +52,9 @@ namespace WebApplication1Dapper.Services
         }
 
         /// <summary>
-        /// Finds a person by their GUID and returns his/her details.
+        /// Finds a person by id and returns his/her details.
         /// </summary>
-        /// <param name="id">A GUID value (uniqueidentifier in SQL) used to find a matching primary key of an existing person record.</param>
+        /// <param name="id">A row identifier used to find a matching primary key of an existing person record.</param>
         /// <returns>Details of the person or null if no matching person record was found.</returns>
         public async Task<Person> GetPersonByIdAsync(int id)
         {
