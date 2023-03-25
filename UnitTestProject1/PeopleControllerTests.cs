@@ -43,19 +43,16 @@ namespace UnitTestProject1
 
             mockPeopleService.Setup(p => p.AddPersonAsync(person)).Returns(Task.Run(() => 
             {
-
                 return 1;
             }));
 
             mockPeopleService.Setup(p => p.UpdatePersonAsync(person)).Returns(Task.Run(() =>
             {
-
                 return 1;
             }));
 
             mockPeopleService.Setup(p => p.DeletePersonAsync(person)).Returns(Task.Run(() =>
             {
-
                 return 1;
             }));
         }
