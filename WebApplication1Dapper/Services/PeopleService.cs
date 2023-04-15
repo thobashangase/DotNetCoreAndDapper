@@ -1,8 +1,7 @@
 ﻿using WebApplication1Dapper.Models;
 using Dapper;
 using System.Data;
-using Microsoft.Data.Sqlite;
-using Serilog;
+using Microsoft.Data.SqlClient;
 
 namespace WebApplication1Dapper.Services
 {
@@ -18,7 +17,7 @@ namespace WebApplication1Dapper.Services
 
         private IDbConnection Connection()
         {
-            var connection = new SqliteConnection(_configuration.GetConnectionString("DefaultConnectionString"));
+            var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnectionString"));
             connection.Open();
             return connection;
         }
@@ -27,12 +26,12 @@ namespace WebApplication1Dapper.Services
         {
             using var connection = Connection();
 
-            var query = "SELECT name FROM sqlite_master WHERE name='People'";
+            var query = "SELECT name FROM sys.tables WHERE name='People'";
             var name = connection.ExecuteScalar<string>(query);
             
             if (string.IsNullOrWhiteSpace(name))
             {
-                var tableQuery = "CREATE TABLE People (Id INTEGER PRIMARY KEY NOT NULL UNIQUE,Name TEXT (30) NOT NULL)";
+                var tableQuery = "CREATE TABLE People (Id INT PRIMARY KEY IDENTITY(1,1) NOT NULL, Name VARCHAR(30) NOT NULL)";
                 connection.Execute(tableQuery);
             }
         }

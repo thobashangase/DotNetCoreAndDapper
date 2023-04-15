@@ -1,5 +1,6 @@
 ﻿using WebApplication1Dapper.Services;
 using Serilog;
+using Serilog.Sinks.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,13 +11,24 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
     options.MinimumSameSitePolicy = SameSiteMode.None;
 });
 
+// Add services to the container.
 builder.Services.AddScoped<IPeopleService, PeopleService>();
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
 builder.Host.UseSerilog((hostContext, services, configuration) => {
-    configuration.WriteTo.Console();
+    configuration.Enrich.FromLogContext().
+        Enrich.WithMachineName().
+        WriteTo.Console().
+        WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(hostContext.Configuration.GetValue<string>("ElasticConfiguration:Uri")))
+        {
+            IndexFormat = $"{hostContext.Configuration.GetValue<string>("ApplicationName")}-logs-{hostContext.HostingEnvironment.EnvironmentName?.ToLower().Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM}",
+            AutoRegisterTemplate = true,
+            NumberOfShards = 2,
+            NumberOfReplicas = 1
+        }).
+        Enrich.WithProperty("Environment", hostContext.HostingEnvironment.EnvironmentName).
+        ReadFrom.Configuration(hostContext.Configuration);
 });
 
 var app = builder.Build();
@@ -29,7 +41,10 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseSerilogRequestLogging();
+
 app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 
 app.UseRouting();
